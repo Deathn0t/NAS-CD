@@ -64,3 +64,10 @@ Problem is:
     - post-training  : None
 ```
 
+## Example
+
+Command line example:
+
+```bash
+python -m deephyper.search.nas.ambs --evaluator subprocess --problem nascd.xorandor.problem.Problem --max-evals 64
+```

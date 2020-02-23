@@ -132,3 +132,9 @@ dmypy.json
 
 *.code-workspace
 .vscode/*
+
+*.dot
+*.png
+*.json
+*.csv
+.DS_Store
