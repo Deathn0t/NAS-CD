@@ -15,7 +15,10 @@ def load_data() -> tuple:
     """
 
     x = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-    y = np.array([[a[0] ^ a[1], a[0] and a[1], a[0] or a[1]] for a in x])
+    y = np.array(
+        [[a[0] ^ a[1], a[0] and a[1], a[0] or a[1]] for a in x], dtype=np.float32
+    )
+    x = x.astype(np.float32)
 
     train_X = x[:]
     train_y = y[:]
