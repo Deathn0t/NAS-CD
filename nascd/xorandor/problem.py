@@ -13,41 +13,42 @@ Problem.load_data(load_data)
 Problem.search_space(create_search_space)
 
 Problem.hyperparameters(
-    batch_size=1,
+    batch_size=2,
     learning_rate=0.01,
-    optimizer="sgd",
-    num_epochs=5,
-    # callbacks=dict(
-    #     EarlyStopping=dict(
-    #         monitor='val_r2', # or 'val_acc' ?
-    #         mode='max',
-    #         verbose=0,
-    #         patience=5
-    #     )
-    # )
+    optimizer="rmsprop",
+    num_epochs=200,
+    callbacks=dict(
+        EarlyStopping=dict(
+            monitor="binary_accuracy", mode="max", verbose=0, patience=5  # or 'val_acc' ?
+        )
+    ),
 )
 
 Problem.loss("binary_crossentropy")  # or 'categorical_crossentropy' ?
 
-Problem.metrics(["acc"])  # or 'acc' ?
+Problem.metrics(["binary_accuracy"])  # or 'acc' ?
 
 
-def myacc_with_pred(info):
-    from sklearn.metrics import accuracy_score
-    import numpy as np
+# def myacc_with_pred(info):
+#     from sklearn.metrics import accuracy_score
+#     import numpy as np
 
-    y_pred = np.array(info["y_pred"])
-    y_pred = (y_pred >= 0.5).astype(int)
-    y_true = info["y_true"]
-    return accuracy_score(y_true, y_pred)
+#     y_pred = np.array(info["y_pred"])
+#     y_pred = (y_pred >= 0.5).astype(np.int32)
+#     y_true = np.array(info["y_true"], dtype=np.int32)
+
+#     acc = (y_true.flatten() == y_pred.flatten()).astype(int).sum() / len(y_true.flatten())
+#     # acc = accuracy_score(y_true, y_pred)
+
+#     return acc
 
 
-Problem.objective(myacc_with_pred)  # or 'val_acc__last' ?
+Problem.objective("binary_accuracy__max")  # or 'val_acc__last' ?
 
 Problem.post_training(
     repeat=1,
     num_epochs=10,
-    metrics=["acc"],
+    metrics=["binary_accuracy"],
     callbacks=dict()
     # callbacks=dict(
     #     ModelCheckpoint={
