@@ -15,11 +15,11 @@ def create_search_space(input_shape=(2,), output_shape=(3,), *args, **kwargs):
     ss = KSearchSpace(input_shape, output_shape)
     x = ss.input_nodes[0]
 
-    out_xor = ConstantNode(op=Dense(1, activation="sigmoid"), name="XOR")
+    out_xor = ConstantNode(op=Dense(1, activation="sigmoid"), name="out_XOR")
 
-    out_and = ConstantNode(op=Dense(1, activation="sigmoid"), name="AND")
+    out_and = ConstantNode(op=Dense(1, activation="sigmoid"), name="out_AND")
 
-    out_or = ConstantNode(op=Dense(1, activation="sigmoid"), name="OR")
+    out_or = ConstantNode(op=Dense(1, activation="sigmoid"), name="out_OR")
 
     in_xor = VariableNode(name="in_XOR")
     in_xor.add_op(Concatenate(ss, [x]))
@@ -56,7 +56,8 @@ def test_create_search_space():
     import tensorflow as tf
 
     search_space = create_search_space()
-    ops = [random() for _ in range(search_space.num_nodes)]
+    # ops = [random() for _ in range(search_space.num_nodes)]
+    ops = [1, 0, 0]
 
     print(f"This search_space needs {len(ops)} choices to generate a neural network.")
 
