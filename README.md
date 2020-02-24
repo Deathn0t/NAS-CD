@@ -21,7 +21,7 @@ Now, install DeepHyper from source to access develop branches:
 ```bash
 git clone https://github.com/deephyper/deephyper.git
 cd deephyper/
-git checkout develop
+git checkout feature/pblp
 pip install -e .
 ```
 
