@@ -4,6 +4,12 @@ Neural Architecture Search for Conditional Dependences
 
 ## Install
 
+Install open-mpi with [Homebrew](https://docs.brew.sh/Installation):
+
+```bash
+brew install open-mpi
+```
+
 Create a conda virtual environment:
 
 ```bash
