@@ -34,7 +34,6 @@ def load_data() -> tuple:
             data.append([float(num_fish[row[0]]),float(row[1]),float(row[2]),float(row[3]),float(row[4]),float(row[5]),float(row[6])])
 
         rd.shuffle(data)
-        data = np.array(data)
         print(data[:,0:2])
         print(data[:,2:])
 
