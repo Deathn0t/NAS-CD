@@ -1,7 +1,5 @@
 import collections
-
 import tensorflow as tf
-
 from deephyper.search.nas.model.space import KSearchSpace
 from deephyper.search.nas.model.space.node import ConstantNode, VariableNode
 from deephyper.search.nas.model.space.op.basic import Tensor
@@ -15,11 +13,25 @@ def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
     ss = KSearchSpace(input_shape, output_shape)
     x = ss.input_nodes[0]
 
-    out_2 = ConstantNode(op=Dense(1, activation="sigmoid"), name="out_2")
-    out_3 = ConstantNode(op=Dense(1, activation="sigmoid"), name="out_3")
-    out_4 = ConstantNode(op=Dense(1, activation="sigmoid"), name="out_4")
-    out_5 = ConstantNode(op=Dense(1, activation="sigmoid"), name="out_5")
-    out_6 = ConstantNode(op=Dense(1, activation="sigmoid"), name="out_6")
+    hid_2 = ConstantNode(op=Dense(8, "relu"), name="hid_2")
+    out_2 = ConstantNode(op=Dense(1), name="out_2")
+    ss.connect(hid_2, out_2)
+
+    hid_3 = ConstantNode(op=Dense(8, "relu"), name="hid_3")
+    out_3 = ConstantNode(op=Dense(1), name="out_3")
+    ss.connect(hid_3, out_3)
+
+    hid_4 = ConstantNode(op=Dense(8, "relu"), name="hid_4")
+    out_4 = ConstantNode(op=Dense(1), name="out_4")
+    ss.connect(hid_4, out_4)
+
+    hid_5 = ConstantNode(op=Dense(8, "relu"), name="hid_5")
+    out_5 = ConstantNode(op=Dense(1), name="out_5")
+    ss.connect(hid_5, out_5)
+
+    hid_6 = ConstantNode(op=Dense(8, "relu"), name="hid_6")
+    out_6 = ConstantNode(op=Dense(1), name="out_6")
+    ss.connect(hid_6, out_6)
 
 
     in_2 = VariableNode(name="in_2")
@@ -40,7 +52,7 @@ def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
     in_2.add_op(Concatenate(ss, [x, out_3, out_4,out_5]))
     in_2.add_op(Concatenate(ss, [x, out_3, out_4,out_5, out_6]))
 
-    ss.connect(in_2, out_2)
+    ss.connect(in_2, hid_2)
 
     in_3 = VariableNode(name="in_3")
     in_3.add_op(Concatenate(ss, [x]))
@@ -60,7 +72,7 @@ def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
     in_3.add_op(Concatenate(ss, [x, out_2, out_4,out_5]))
     in_3.add_op(Concatenate(ss, [x, out_2, out_4,out_5, out_6]))
 
-    ss.connect(in_3, out_3)
+    ss.connect(in_3, hid_3)
 
     in_4 = VariableNode(name="in_4")
     in_4.add_op(Concatenate(ss, [x]))
@@ -80,7 +92,7 @@ def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
     in_4.add_op(Concatenate(ss, [x, out_2, out_3,out_5]))
     in_4.add_op(Concatenate(ss, [x, out_2, out_3,out_5, out_6]))
 
-    ss.connect(in_4, out_4)
+    ss.connect(in_4, hid_4)
 
     in_5 = VariableNode(name="in_5")
     in_5.add_op(Concatenate(ss, [x]))
@@ -100,7 +112,7 @@ def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
     in_5.add_op(Concatenate(ss, [x, out_2, out_3,out_4]))
     in_5.add_op(Concatenate(ss, [x, out_2, out_3,out_4, out_6]))
 
-    ss.connect(in_5, out_5)
+    ss.connect(in_5, hid_5)
 
     in_6 = VariableNode(name="in_6")
     in_6.add_op(Concatenate(ss, [x]))
@@ -122,7 +134,7 @@ def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
 
 
 
-    ss.connect(in_6, out_6)
+    ss.connect(in_6, hid_6)
 
     out = ConstantNode(name="OUT")
     out.set_op(Concatenate(ss, stacked_nodes=[out_2,out_3,out_4,out_5,out_6]))
@@ -141,10 +153,11 @@ def test_create_search_space():
     search_space = create_search_space()
     # ops = [random() for _ in range(search_space.num_nodes)]
     # ops = [0. for _ in range(search_space.num_nodes)]
-    ops = [0, 1, 2, 3, 4]
+    ops = [0, 13, 7, 0, 0]
     #ops = [1, 0, 0]
 
     print(f"This search_space needs {len(ops)} choices to generate a neural network.")
+    print(f"Search space size is: {search_space.size}")
 
     search_space.set_ops(ops)
     search_space.draw_graphviz("sampled_neural_network.dot")
