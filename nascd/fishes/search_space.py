@@ -139,7 +139,8 @@ def test_create_search_space():
     import tensorflow as tf
 
     search_space = create_search_space()
-    ops = [random() for _ in range(search_space.num_nodes)]
+    # ops = [random() for _ in range(search_space.num_nodes)]
+    ops = [0. for _ in range(search_space.num_nodes)]
     #ops = [1, 0, 0]
 
     print(f"This search_space needs {len(ops)} choices to generate a neural network.")

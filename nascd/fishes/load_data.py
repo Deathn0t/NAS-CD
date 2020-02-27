@@ -2,6 +2,11 @@ import numpy as np
 import csv
 import random as rd
 
+import os
+HERE = os.path.dirname(os.path.abspath(__file__)) # useful to locate data files with respect to this fil
+data_dir = os.path.join(os.path.dirname(os.path.dirname(HERE)), "data")
+print(f"DATA_PATH: {data_dir}")
+
 np.random.seed(2019)
 
 def load_data() -> tuple:
@@ -21,7 +26,7 @@ def load_data() -> tuple:
     num_fish['Smelt'] = 6
 
 
-    with open('Fish.csv', newline='') as csvfile:
+    with open(os.path.join(data_dir, 'Fish.csv'), newline='') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=',', quotechar='|')
         data = []
 
@@ -34,15 +39,16 @@ def load_data() -> tuple:
             data.append([float(num_fish[row[0]]),float(row[1]),float(row[2]),float(row[3]),float(row[4]),float(row[5]),float(row[6])])
 
         rd.shuffle(data)
-        print(data[:,0:2])
-        print(data[:,2:])
+        data = np.array(data)
+        print("input shape: ", np.shape(data[:,0:2]))
+        print("output shape: ", np.shape(data[:,2:]))
 
 
         return (data[:,0:2], data[:,2:]), (data[:,0:2], data[:,2:])
 
-        
-        
-        
+
+
+
 
 
 

@@ -6,7 +6,7 @@ from nascd.xorandor.problem import Problem
 config = Problem.space
 config["hyperparameters"]["verbose"] = 1
 
-config["arch_seq"] = [0, 3, 1]
+config["arch_seq"] = [2, 1, 0]
 
 config["id"] = 0
 config["seed"] = 42

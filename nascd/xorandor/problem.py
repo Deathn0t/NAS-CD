@@ -14,12 +14,12 @@ Problem.search_space(create_search_space)
 
 Problem.hyperparameters(
     batch_size=2,
-    learning_rate=0.01,
+    learning_rate=1.,
     optimizer="rmsprop",
-    num_epochs=200,
+    num_epochs=2500,
     callbacks=dict(
         EarlyStopping=dict(
-            monitor="binary_accuracy", mode="max", verbose=0, patience=5  # or 'val_acc' ?
+            monitor="loss", mode="min", verbose=0, patience=5  # or 'val_acc' ?
         )
     ),
 )
@@ -47,7 +47,7 @@ Problem.objective("binary_accuracy__max")  # or 'val_acc__last' ?
 
 Problem.post_training(
     repeat=1,
-    num_epochs=10,
+    num_epochs=3000,
     metrics=["binary_accuracy"],
     callbacks=dict()
     # callbacks=dict(
