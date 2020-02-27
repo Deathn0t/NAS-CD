@@ -140,7 +140,8 @@ def test_create_search_space():
 
     search_space = create_search_space()
     # ops = [random() for _ in range(search_space.num_nodes)]
-    ops = [0. for _ in range(search_space.num_nodes)]
+    # ops = [0. for _ in range(search_space.num_nodes)]
+    ops = [0, 1, 2, 3, 4]
     #ops = [1, 0, 0]
 
     print(f"This search_space needs {len(ops)} choices to generate a neural network.")
