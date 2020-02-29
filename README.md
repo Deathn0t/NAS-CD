@@ -72,8 +72,14 @@ Problem is:
 
 ## Example
 
-Command line example:
+Execute an asynchronous model-based search with:
 
 ```bash
 python -m deephyper.search.nas.ambs --evaluator subprocess --problem nascd.xorandor.problem.Problem --max-evals 64
+```
+
+Execute a nascd search with a quick evaluation function `(sum(arch_seq))`:
+
+```bash
+python -m nascd.search.rtg_pg --problem nascd.xorandor.problem.Problem --run deephyper.search.nas.model.run.quick.run
 ```
