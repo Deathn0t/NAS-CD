@@ -121,7 +121,9 @@ def reward_to_go(rews):
 
 
 def train(
-    env_name="CartPole-v0",
+    num_envs,
+    problem,
+    evaluator,
     hidden_sizes=[32],
     lr=1e-2,
     epochs=50,
@@ -130,7 +132,7 @@ def train(
 ):
 
     # make environment, check spaces, get obs / act dims
-    env = gym.make(env_name)
+    env = build_env(num_envs, problem, evaluator)
     assert isinstance(
         env.observation_space, Box
     ), "This example only works for envs with continuous state spaces."
