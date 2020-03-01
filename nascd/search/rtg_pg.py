@@ -63,44 +63,12 @@ class RtgPG(NeuralArchitectureSearch):
     def main(self):
 
         # Setup
-        space = self.problem.space
-        cs_kwargs = space["create_search_space"].get("kwargs")
-        if cs_kwargs is None:
-            search_space = space["create_search_space"]["func"]()
-        else:
-            search_space = space["create_search_space"]["func"](**cs_kwargs)
+        num_envs = 1
+        N = 1
+        env = build_env(num_envs, self.problem, self.evaluator)
+        batch_size = N * env.num_actions_per_env  # TODO
 
-        len_arch = search_space.num_nodes
-
-        def gen_arch():
-            return [random() for _ in range(len_arch)]
-
-        num_evals_done = 0
-        available_workers = self.free_workers
-
-        def gen_batch(size):
-            batch = []
-            for _ in range(size):
-                cfg = space.copy()
-                cfg["arch_seq"] = gen_arch()
-                batch.append(cfg)
-            return batch
-
-        # Filling available nodes at start
-        self.evaluator.add_eval_batch(gen_batch(size=available_workers))
-
-        # Main loop
-        while num_evals_done < self.max_evals:
-            results = self.evaluator.get_finished_evals()
-
-            num_received = num_evals_done
-            for _ in results:
-                num_evals_done += 1
-            num_received = num_evals_done - num_received
-
-            # Filling available nodes
-            if num_received > 0:
-                self.evaluator.add_eval_batch(gen_batch(size=num_received))
+        train(env, batch_size=batch_size)
 
 
 def mlp(sizes, activation=nn.Tanh, output_activation=nn.Identity):
@@ -120,19 +88,10 @@ def reward_to_go(rews):
     return rtgs
 
 
-def train(
-    num_envs,
-    problem,
-    evaluator,
-    hidden_sizes=[32],
-    lr=1e-2,
-    epochs=50,
-    batch_size=5000,
-    render=False,
-):
+def train(env, hidden_sizes=[32], lr=1e-2, epochs=50, batch_size=5000, render=False):
 
     # make environment, check spaces, get obs / act dims
-    env = build_env(num_envs, problem, evaluator)
+    # env = build_env(num_envs, problem, evaluator)
     assert isinstance(
         env.observation_space, Box
     ), "This example only works for envs with continuous state spaces."
@@ -140,7 +99,7 @@ def train(
         env.action_space, Discrete
     ), "This example only works for envs with discrete action spaces."
 
-    obs_dim = env.observation_space.shape[0]
+    obs_dim = env.observation_space.shape[0]  # TODO
     n_acts = env.action_space.n
 
     # make core of policy network
@@ -192,11 +151,13 @@ def train(
 
             # act in the environment
             act = get_action(torch.as_tensor(obs, dtype=torch.float32))
-            obs, rew, done, _ = env.step(act)
+            print("act: ", act)
+            obs, rew, done, _ = env.step([act])
+            # obs = act
 
             # save action, reward
-            batch_acts.append(act)
-            ep_rews.append(rew)
+            batch_acts.append(act)  # x
+            ep_rews.append(rew)  # y
 
             if done:
                 # if episode is over, record info about episode
@@ -214,6 +175,7 @@ def train(
                 finished_rendering_this_epoch = True
 
                 # end experience loop if we have enough of it
+                print(f"len(batch_ops:{len(batch_obs)}, batch_size:{batch_size}")
                 if len(batch_obs) > batch_size:
                     break
 
@@ -235,6 +197,8 @@ def train(
             "epoch: %3d \t loss: %.3f \t return: %.3f \t ep_len: %.3f"
             % (i, batch_loss, np.mean(batch_rets), np.mean(batch_lens))
         )
+        print(batch_rets)
+        exit()
 
 
 def build_env(num_envs, problem, evaluator):
