@@ -26,10 +26,10 @@ def create_search_space(input_shape=(2,), output_shape=(3,), *args, **kwargs):
     out_or = ConstantNode(op=Dense(1, activation="sigmoid"), name="out_OR")
 
     in_xor = VariableNode(name="in_XOR")
-    in_xor.add_op(Concatenate(ss, [x]))
-    in_xor.add_op(Concatenate(ss, [x, out_and]))
-    in_xor.add_op(Concatenate(ss, [x, out_or]))
-    in_xor.add_op(Concatenate(ss, [x, out_and, out_or]))
+    in_xor.add_op(Concatenate(ss, [x]))  # 0
+    in_xor.add_op(Concatenate(ss, [x, out_and]))  # 1
+    in_xor.add_op(Concatenate(ss, [x, out_or]))  # 2
+    in_xor.add_op(Concatenate(ss, [x, out_and, out_or]))  # 3
     ss.connect(in_xor, out_xor)
 
     in_and = VariableNode(name="in_AND")

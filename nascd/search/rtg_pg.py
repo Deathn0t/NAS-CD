@@ -64,11 +64,11 @@ class RtgPG(NeuralArchitectureSearch):
 
         # Setup
         num_envs = 1
-        N = 1
+        N = 8
         env = build_env(num_envs, self.problem, self.evaluator)
         batch_size = N * env.num_actions_per_env  # TODO
-
-        train(env, batch_size=batch_size)
+        epochs = 200
+        train(env, epochs=epochs, batch_size=batch_size)
 
 
 def mlp(sizes, activation=nn.Tanh, output_activation=nn.Identity):
@@ -100,6 +100,7 @@ def train(env, hidden_sizes=[32], lr=1e-2, epochs=50, batch_size=5000, render=Fa
     ), "This example only works for envs with discrete action spaces."
 
     obs_dim = env.observation_space.shape[0]  # TODO
+    print(f"obs_dim: {obs_dim}")
     n_acts = env.action_space.n
 
     # make core of policy network
@@ -151,7 +152,6 @@ def train(env, hidden_sizes=[32], lr=1e-2, epochs=50, batch_size=5000, render=Fa
 
             # act in the environment
             act = get_action(torch.as_tensor(obs, dtype=torch.float32))
-            print("act: ", act)
             obs, rew, done, _ = env.step([act])
             # obs = act
 
@@ -175,8 +175,8 @@ def train(env, hidden_sizes=[32], lr=1e-2, epochs=50, batch_size=5000, render=Fa
                 finished_rendering_this_epoch = True
 
                 # end experience loop if we have enough of it
-                print(f"len(batch_ops:{len(batch_obs)}, batch_size:{batch_size}")
-                if len(batch_obs) > batch_size:
+                # print(f"len(batch_ops:{len(batch_obs)}, batch_size:{batch_size}")
+                if len(batch_obs) == batch_size:
                     break
 
         # take a single policy gradient update step
@@ -197,8 +197,6 @@ def train(env, hidden_sizes=[32], lr=1e-2, epochs=50, batch_size=5000, render=Fa
             "epoch: %3d \t loss: %.3f \t return: %.3f \t ep_len: %.3f"
             % (i, batch_loss, np.mean(batch_rets), np.mean(batch_lens))
         )
-        print(batch_rets)
-        exit()
 
 
 def build_env(num_envs, problem, evaluator):
