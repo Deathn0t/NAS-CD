@@ -83,3 +83,15 @@ Execute a nascd search with a quick evaluation function `(sum(arch_seq))`:
 ```bash
 python -m nascd.search.rtg_pg --problem nascd.xorandor.problem.Problem --run deephyper.search.nas.model.run.quick.run
 ```
+
+Parse the logs to create a json file with collected data:
+
+```bash
+deephyper-analytics parse deephyper.log
+```
+
+Create a jupyter notebook to plot from these data:
+
+```bash
+deephyper-analytics single -p $json_data_file
+```
