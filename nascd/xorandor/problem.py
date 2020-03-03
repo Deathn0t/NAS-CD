@@ -14,9 +14,10 @@ Problem.search_space(create_search_space)
 
 Problem.hyperparameters(
     batch_size=2,
-    learning_rate=1.,
+    learning_rate=1.0,
     optimizer="rmsprop",
     num_epochs=2500,
+    verbose=0,
     callbacks=dict(
         EarlyStopping=dict(
             monitor="loss", mode="min", verbose=0, patience=5  # or 'val_acc' ?

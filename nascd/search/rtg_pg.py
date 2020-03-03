@@ -14,7 +14,11 @@ from deephyper.search import util
 from deephyper.search.nas import NeuralArchitectureSearch
 from deephyper.core.logs.logging import JsonMessage as jm
 from deephyper.evaluator.evaluate import Encoder
-from deephyper.search.nas.env.neural_architecture_envs import NeuralArchitectureVecEnv
+
+# from deephyper.search.nas.env.neural_architecture_envs import NeuralArchitectureVecEnv
+from nascd.env.nasenv import NasEnv2
+
+ENV = NasEnv2
 
 dhlogger = util.conf_logger("nascd.search.rtg_pg")
 
@@ -67,8 +71,9 @@ class RtgPG(NeuralArchitectureSearch):
         N = 8
         env = build_env(num_envs, self.problem, self.evaluator)
         batch_size = N * env.num_actions_per_env  # TODO
-        epochs = 200
-        train(env, epochs=epochs, batch_size=batch_size)
+        epochs = 300
+        lr = 1e-2
+        train(env, lr=lr, epochs=epochs, batch_size=batch_size)
 
 
 def mlp(sizes, activation=nn.Tanh, output_activation=nn.Identity):
@@ -78,6 +83,76 @@ def mlp(sizes, activation=nn.Tanh, output_activation=nn.Identity):
         act = activation if j < len(sizes) - 2 else output_activation
         layers += [nn.Linear(sizes[j], sizes[j + 1]), act()]
     return nn.Sequential(*layers)
+
+
+class PolicyGRU(nn.Module):
+    def __init__(self, sizes, activation=nn.Tanh, output_activation=nn.Identity):
+        super().__init__()
+        self.layers = nn.ModuleList()
+        # >>> rnn = nn.GRU(10, 20, 2)
+        # >>> input = torch.randn(5, 3, 10)
+        # >>> h0 = torch.randn(2, 3, 20)
+        # >>> output, hn = rnn(input, h0)
+        # print("sizes: ", sizes)
+        nh = 32  # number of units in gru cell
+        nl = 1  # number of layers
+        self.rnn = nn.GRU(sizes[0], nh, nl)
+        self.h0 = torch.randn(nl, 1, nh)
+        self.layer_out = nn.Linear(nh, sizes[-1])
+        # for j in range(len(sizes) - 1):
+        #     act = activation if j < len(sizes) - 2 else output_activation
+        #     self.layers.append(nn.Linear(sizes[j], sizes[j + 1]))
+        #     self.layers.append(act())
+        self.hn = self.h0
+
+    def forward(self, x, done=False):
+        if done:
+            self.hn = self.h0
+        if len(x.size()) == 3:
+            output, self.hn = self.rnn(x, self.h0)
+        else:
+            x = x.unsqueeze(0)
+            # print("x.size: ", x.size(), len(x.size()))
+            output, self.hn = self.rnn(x, self.hn)
+            output = output.squeeze(0)
+        # print("output: ", output)
+        output = self.layer_out(output)
+
+        return output
+
+
+class PolicyLSTM(nn.Module):
+    def __init__(self, sizes, activation=nn.Tanh, output_activation=nn.Identity):
+        super().__init__()
+        self.layers = nn.ModuleList()
+        # >>> rnn = nn.LSTM(10, 20, 2)
+        # >>> input = torch.randn(5, 3, 10)
+        # >>> h0 = torch.randn(2, 3, 20)
+        # >>> c0 = torch.randn(2, 3, 20)
+        # >>> output, (hn, cn) = rnn(input, (h0, c0))
+        nh = 32  # number of units in gru cell
+        nl = 2  # number of layers
+        self.rnn = nn.LSTM(sizes[0], nh, nl)
+        self.h0 = torch.randn(nl, 1, nh)
+        self.c0 = torch.randn(nl, 1, nh)
+        self.layer_out = nn.Linear(nh, sizes[-1])
+        self.hn = self.h0
+        self.cn = self.c0
+
+    def forward(self, x, done=False):
+        if done:
+            self.hn = self.h0
+            self.cn = self.c0
+        if len(x.size()) == 3:
+            output, (self.hn, self.cn) = self.rnn(x, (self.h0, self.c0))
+        else:
+            x = x.unsqueeze(0)
+            output, (self.hn, self.cn) = self.rnn(x, (self.hn, self.cn))
+            output = output.squeeze(0)
+        # print("output: ", output)
+        output = self.layer_out(output)
+
+        return output
 
 
 def reward_to_go(rews):
@@ -104,20 +179,21 @@ def train(env, hidden_sizes=[32], lr=1e-2, epochs=50, batch_size=5000, render=Fa
     n_acts = env.action_space.n
 
     # make core of policy network
-    logits_net = mlp(sizes=[obs_dim] + hidden_sizes + [n_acts])
+    # logits_net = mlp(sizes=[obs_dim] + hidden_sizes + [n_acts])
+    logits_net = PolicyLSTM(sizes=[obs_dim, n_acts])
 
     # make function to compute action distribution
-    def get_policy(obs):
-        logits = logits_net(obs)
+    def get_policy(obs, done):
+        logits = logits_net(obs, done)
         return Categorical(logits=logits)
 
     # make action selection function (outputs int actions, sampled from policy)
-    def get_action(obs):
-        return get_policy(obs).sample().item()
+    def get_action(obs, done):
+        return get_policy(obs, done).sample().item()
 
     # make loss function whose gradient, for the right data, is policy gradient
     def compute_loss(obs, act, weights):
-        logp = get_policy(obs).log_prob(act)
+        logp = get_policy(obs, True).log_prob(act)
         return -(logp * weights).mean()
 
     # make optimizer
@@ -149,11 +225,13 @@ def train(env, hidden_sizes=[32], lr=1e-2, epochs=50, batch_size=5000, render=Fa
 
             # save obs
             batch_obs.append(obs.copy())
+            # print(batch_obs)
 
             # act in the environment
-            act = get_action(torch.as_tensor(obs, dtype=torch.float32))
+            act = get_action(torch.as_tensor(obs, dtype=torch.float32), done)
             obs, rew, done, _ = env.step([act])
-            # obs = act
+            # print("rew: ", rew)
+            # print("obs: ", obs)
 
             # save action, reward
             batch_acts.append(act)  # x
@@ -166,7 +244,8 @@ def train(env, hidden_sizes=[32], lr=1e-2, epochs=50, batch_size=5000, render=Fa
                 batch_lens.append(ep_len)
 
                 # the weight for each logprob(a_t|s_t) is reward-to-go from t
-                batch_weights += list(reward_to_go(ep_rews))
+                # batch_weights += list(reward_to_go(ep_rews))
+                batch_weights += [ep_ret] * ep_len
 
                 # reset episode-specific variables
                 obs, done, ep_rews = env.reset(), False, []
@@ -176,7 +255,9 @@ def train(env, hidden_sizes=[32], lr=1e-2, epochs=50, batch_size=5000, render=Fa
 
                 # end experience loop if we have enough of it
                 # print(f"len(batch_ops:{len(batch_obs)}, batch_size:{batch_size}")
+                # print("len(batch_obs): ", len(batch_obs))
                 if len(batch_obs) == batch_size:
+                    # exit()
                     break
 
         # take a single policy gradient update step
@@ -217,7 +298,7 @@ def build_env(num_envs, problem, evaluator):
         search_space = space["create_search_space"]["func"]()
     else:
         search_space = space["create_search_space"]["func"](**cs_kwargs)
-    env = NeuralArchitectureVecEnv(num_envs, space, evaluator, search_space)
+    env = ENV(num_envs, space, evaluator, search_space)
     return env
 
 

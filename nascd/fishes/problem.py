@@ -14,25 +14,23 @@ Problem.search_space(create_search_space)
 Problem.hyperparameters(
     batch_size=8,
     learning_rate=0.01,
-    optimizer='adam',
+    optimizer="adam",
     num_epochs=200,
+    verbose=0,
     callbacks=dict(
         EarlyStopping=dict(
-            monitor='r2', # or 'val_acc' ?
-            mode='max',
-            verbose=0,
-            patience=5
+            monitor="r2", mode="max", verbose=0, patience=5  # or 'val_acc' ?
         )
-    )
+    ),
 )
 
-Problem.loss('mse') # or 'categorical_crossentropy' ?
+Problem.loss("mse")  # or 'categorical_crossentropy' ?
 
-Problem.metrics(['r2']) # or 'acc' ?
+Problem.metrics(["r2"])  # or 'acc' ?
 
-Problem.objective('r2__max') # or 'val_acc__last' ?
+Problem.objective("r2__max")  # or 'val_acc__last' ?
 
 
 # Just to print your problem, to test its definition and imports in the current python environment.
-if __name__ == '__main__':
+if __name__ == "__main__":
     print(Problem)
