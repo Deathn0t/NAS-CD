@@ -131,7 +131,7 @@ class PolicyLSTM(nn.Module):
         # >>> c0 = torch.randn(2, 3, 20)
         # >>> output, (hn, cn) = rnn(input, (h0, c0))
         nh = 32  # number of units in gru cell
-        nl = 2  # number of layers
+        nl = 1  # number of layers
         self.rnn = nn.LSTM(sizes[0], nh, nl)
         self.h0 = torch.randn(nl, 1, nh)
         self.c0 = torch.randn(nl, 1, nh)
@@ -180,7 +180,8 @@ def train(env, hidden_sizes=[32], lr=1e-2, epochs=50, batch_size=5000, render=Fa
 
     # make core of policy network
     # logits_net = mlp(sizes=[obs_dim] + hidden_sizes + [n_acts])
-    logits_net = PolicyLSTM(sizes=[obs_dim, n_acts])
+    # logits_net = PolicyLSTM(sizes=[obs_dim, n_acts])
+    logits_net = PolicyGRU(sizes=[obs_dim, n_acts])
 
     # make function to compute action distribution
     def get_policy(obs, done):
