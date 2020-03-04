@@ -36,6 +36,10 @@ def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
     # L1 DEPENDENT ON DATA OVERALL
     in_2 = VariableNode(name="in_2")
     in_2.add_op(Concatenate(ss, [x]))
+    in_2.add_op(Concatenate(ss, [x, out_3]))
+    in_2.add_op(Concatenate(ss, [x, out_4]))
+    in_2.add_op(Concatenate(ss, [x, out_5]))
+    in_2.add_op(Concatenate(ss, [x, out_6]))
 
     ss.connect(in_2, hid_2)
 
@@ -46,21 +50,38 @@ def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
     
     ss.connect(in_3, hid_3)
 
-    # L3 DEPENDANT ON DATA, L1 L2 AND WEIGHT
+    # L3 DEPENDANT ON DATA, L1 L2 AND WIDTH
     in_4 = VariableNode(name="in_4")
     in_4.add_op(Concatenate(ss, [x]))
     in_4.add_op(Concatenate(ss, [x, out_2]))
     in_4.add_op(Concatenate(ss, [x, out_3]))
+    in_4.add_op(Concatenate(ss, [x, out_5]))
     in_4.add_op(Concatenate(ss, [x, out_6]))
     in_4.add_op(Concatenate(ss, [x, out_2,out_3]))
+    in_4.add_op(Concatenate(ss, [x, out_2,out_5]))
     in_4.add_op(Concatenate(ss, [x, out_2,out_6]))
+    in_4.add_op(Concatenate(ss, [x, out_3,out_5]))
     in_4.add_op(Concatenate(ss, [x, out_3,out_6]))
+    in_4.add_op(Concatenate(ss, [x, out_5,out_6]))
+    in_4.add_op(Concatenate(ss, [x, out_3, out_5,out_6]))
+    in_4.add_op(Concatenate(ss, [x, out_2, out_5,out_6]))
+    in_4.add_op(Concatenate(ss, [x, out_2, out_3,out_6]))
+    in_4.add_op(Concatenate(ss, [x, out_2, out_3,out_5]))
+    in_4.add_op(Concatenate(ss, [x, out_2, out_3,out_5, out_6]))
 
-    
     ss.connect(in_4, hid_4)
 
     # HEIGHT DEPENDANT ON ALL MEASURES COMBINED AND DATA
     in_5 = VariableNode(name="in_5")
+    in_5.add_op(Concatenate(ss, [x]))
+    in_5.add_op(Concatenate(ss, [x, out_2]))
+    in_5.add_op(Concatenate(ss, [x, out_3]))
+    in_5.add_op(Concatenate(ss, [x, out_4]))
+    in_5.add_op(Concatenate(ss, [x, out_6]))
+    in_5.add_op(Concatenate(ss, [x, out_2,out_3]))
+    in_5.add_op(Concatenate(ss, [x, out_2,out_4]))
+    in_5.add_op(Concatenate(ss, [x, out_2,out_6]))
+    in_5.add_op(Concatenate(ss, [x, out_3,out_4]))
     in_5.add_op(Concatenate(ss, [x, out_3,out_6]))
     in_5.add_op(Concatenate(ss, [x, out_4,out_6]))
     in_5.add_op(Concatenate(ss, [x, out_3, out_4,out_6]))
@@ -68,17 +89,15 @@ def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
     in_5.add_op(Concatenate(ss, [x, out_2, out_3,out_6]))
     in_5.add_op(Concatenate(ss, [x, out_2, out_3,out_4]))
     in_5.add_op(Concatenate(ss, [x, out_2, out_3,out_4, out_6]))
-
     ss.connect(in_5, hid_5)
 
-    # WEIGHT DEPENDANT ON DATA AND CROSS SECTION 
+# WIDTH DEPENDANT ON DATA AND CROSS SECTION 
     in_6 = VariableNode(name="in_6")
     in_6.add_op(Concatenate(ss, [x]))
     in_6.add_op(Concatenate(ss, [x, out_2]))
     in_6.add_op(Concatenate(ss, [x, out_3]))
     in_6.add_op(Concatenate(ss, [x, out_4]))
     in_6.add_op(Concatenate(ss, [x, out_5]))
-
     ss.connect(in_6, hid_6)
 
     out = ConstantNode(name="OUT")

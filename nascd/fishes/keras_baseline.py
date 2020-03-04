@@ -3,8 +3,9 @@ import tensorflow as tf
 import numpy as np
 from nascd.fishes.load_data import load_data
 import matplotlib.pyplot as plt
+from sklearn.metrics import r2_score
 
-(x, y), _ = load_data()
+(X_train, y_train), (X_valid,y_valid)= load_data()
 
 class MyModel(tf.keras.Model):
     def __init__(self):
@@ -30,8 +31,10 @@ model = MyModel()
 model.compile(loss="mse")
 
 tstart = time.time()
-hist  = model.fit(x, y, epochs=1000, batch_size=8).history
+hist  = model.fit(X_train, y_train, epochs=1000, batch_size=8).history
 t = time.time() - tstart
+pred = model.predict(X_valid)
+print("R2 SCORE",r2_score(y_valid, pred))
 
 print(f"Training time: {t}")
 
