@@ -1,6 +1,6 @@
 from deephyper.benchmark import NaProblem
-from nascd.fishes.load_data import load_data
-from nascd.fishes.search_space import create_search_space
+from nascd.ImprovedFishes.load_data import load_data
+from nascd.ImprovedFishes.search_space import create_search_space
 from deephyper.search.nas.model.preprocessing import minmaxstdscaler
 
 Problem = NaProblem(seed=2019)
