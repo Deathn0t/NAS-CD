@@ -68,7 +68,7 @@ class RtgPG(NeuralArchitectureSearch):
 
         # Setup
         num_envs = 1
-        N = 8
+        N = 1
         env = build_env(num_envs, self.problem, self.evaluator)
         batch_size = N * env.num_actions_per_env  # TODO
         epochs = 300
