@@ -1,11 +1,24 @@
 import collections
 import tensorflow as tf
-from deephyper.search.nas.model.space import KSearchSpace
+from deephyper.search.nas.model.space import KSearchSpace, AutoKSearchSpace
 from deephyper.search.nas.model.space.node import ConstantNode, VariableNode
 from deephyper.search.nas.model.space.op.basic import Tensor
 from deephyper.search.nas.model.space.op.connect import Connect
 from deephyper.search.nas.model.space.op.merge import Concatenate
 from deephyper.search.nas.model.space.op.op1d import Dense, Identity
+
+def create_search_space_old(input_shape=(2,), output_shape=(5,), *args, **kwargs):
+    ss = AutoKSearchSpace(input_shape, output_shape, regression=True)
+
+    prev = ss.input_nodes[0]
+    for _ in range(3):
+        cn = ConstantNode(Dense(10, "relu"))
+        ss.connect(prev, cn)
+        prev = cn
+
+    cn = ConstantNode(Dense(5))
+    ss.connect(prev, cn)
+    return ss
 
 
 def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
@@ -13,23 +26,25 @@ def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
     ss = KSearchSpace(input_shape, output_shape)
     x = ss.input_nodes[0]
 
-    hid_2 = ConstantNode(op=Dense(8, "relu"), name="hid_2")
+    nunits = 10
+
+    hid_2 = ConstantNode(op=Dense(nunits, "relu"), name="hid_2")
     out_2 = ConstantNode(op=Dense(1), name="out_2")
     ss.connect(hid_2, out_2)
 
-    hid_3 = ConstantNode(op=Dense(8, "relu"), name="hid_3")
+    hid_3 = ConstantNode(op=Dense(nunits, "relu"), name="hid_3")
     out_3 = ConstantNode(op=Dense(1), name="out_3")
     ss.connect(hid_3, out_3)
 
-    hid_4 = ConstantNode(op=Dense(8, "relu"), name="hid_4")
+    hid_4 = ConstantNode(op=Dense(nunits, "relu"), name="hid_4")
     out_4 = ConstantNode(op=Dense(1), name="out_4")
     ss.connect(hid_4, out_4)
 
-    hid_5 = ConstantNode(op=Dense(8, "relu"), name="hid_5")
+    hid_5 = ConstantNode(op=Dense(nunits, "relu"), name="hid_5")
     out_5 = ConstantNode(op=Dense(1), name="out_5")
     ss.connect(hid_5, out_5)
 
-    hid_6 = ConstantNode(op=Dense(8, "relu"), name="hid_6")
+    hid_6 = ConstantNode(op=Dense(nunits, "relu"), name="hid_6")
     out_6 = ConstantNode(op=Dense(1), name="out_6")
     ss.connect(hid_6, out_6)
 
@@ -47,7 +62,7 @@ def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
     in_3 = VariableNode(name="in_3")
     in_3.add_op(Concatenate(ss, [x, out_2]))
     in_3.add_op(Concatenate(ss, [x, out_4]))
-    
+
     ss.connect(in_3, hid_3)
 
     # L3 DEPENDANT ON DATA, L1 L2 AND WIDTH
@@ -91,7 +106,7 @@ def create_search_space(input_shape=(2,), output_shape=(5,), *args, **kwargs):
     in_5.add_op(Concatenate(ss, [x, out_2, out_3,out_4, out_6]))
     ss.connect(in_5, hid_5)
 
-# WIDTH DEPENDANT ON DATA AND CROSS SECTION 
+# WIDTH DEPENDANT ON DATA AND CROSS SECTION
     in_6 = VariableNode(name="in_6")
     in_6.add_op(Concatenate(ss, [x]))
     in_6.add_op(Concatenate(ss, [x, out_2]))
@@ -117,7 +132,8 @@ def test_create_search_space():
     search_space = create_search_space()
     # ops = [random() for _ in range(search_space.num_nodes)]
     # ops = [0. for _ in range(search_space.num_nodes)]
-    ops = [0, 13, 7, 0, 0]
+    # ops = [0, 13, 7, 0, 0]
+    ops = [0.125, 0.125, 0.6875, 0.125, 0.8125]
     #ops = [1, 0, 0]
 
     print(f"This search_space needs {len(ops)} choices to generate a neural network.")

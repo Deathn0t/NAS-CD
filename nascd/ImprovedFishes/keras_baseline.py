@@ -1,9 +1,10 @@
 import time
 import tensorflow as tf
 import numpy as np
-from nascd.fishes.load_data import load_data
+from nascd.ImprovedFishes.load_data import load_data
 import matplotlib.pyplot as plt
 from sklearn.metrics import r2_score
+
 
 (X_train, y_train), (X_valid,y_valid)= load_data()
 
@@ -28,10 +29,13 @@ class MyModel(tf.keras.Model):
 model = MyModel()
 
 # code to bce loss: https://github.com/tensorflow/tensorflow/blob/v2.1.0/tensorflow/python/keras/backend.py#L4585-L4615
-model.compile(loss="mse")
+model.compile("adam", loss="mse", metrics=["mse"])
 
 tstart = time.time()
-hist  = model.fit(X_train, y_train, epochs=100, batch_size=8).history
+hist  = model.fit(X_train, y_train,
+    validation_data=(X_valid,y_valid),
+    epochs=1000,
+    batch_size=8).history
 t = time.time() - tstart
 pred = model.predict(X_valid)
 print("R2 SCORE",r2_score(y_valid, pred))
@@ -41,7 +45,8 @@ print("R2 SCORE",r2_score(y_valid, pred))
 
 print(f"Training time: {t}")
 
-plt.plot(hist["loss"])
+plt.plot(hist["loss"], 'b')
+plt.plot(hist["val_loss"], 'r')
 plt.xlabel("epochs")
 plt.ylabel("Loss: MSE")
 plt.show()

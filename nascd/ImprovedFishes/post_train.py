@@ -1,12 +1,14 @@
 import numpy as np
 from sklearn.metrics import accuracy_score
 from deephyper.post.pipeline import train
-from nascd.fishes.problem import Problem
+from nascd.ImprovedFishes.problem import Problem
 
 config = Problem.space
 config["hyperparameters"]["verbose"] = 1
 
-config["arch_seq"] = [0, 13, 7, 0, 0]
+# config["arch_seq"] = []
+# config["arch_seq"] = [0, 13, 7, 0, 0] # AMBS
+config["arch_seq"] = [0.125, 0.125, 0.6875, 0.125, 0.8125] # PPO2
 
 config["id"] = 0
 config["seed"] = 42

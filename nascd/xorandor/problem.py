@@ -4,7 +4,7 @@ from nascd.xorandor.search_space import create_search_space
 
 # from deephyper.search.nas.model.preprocessing import stdscaler
 
-Problem = NaProblem(seed=2019)
+Problem = NaProblem(seed=4968214)
 
 Problem.load_data(load_data)
 
