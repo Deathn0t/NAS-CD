@@ -1,6 +1,14 @@
 # NAS-CD
 
-Neural Architecture Search for Conditional Dependences
+Neural Architecture Search for Conditional Dependences is a deep dearning procedure that looks for the dependecies between the different outputs of a deep neural network.
+
+* [Report on Neural Architecture Search for Conditional Dependencies](./assets/project_report.pdf)
+
+![Automatic search](./assets/img/search.png)
+
+![Best models found](./assets/img/best-models-found.jpeg)
+
+![Best models on fishes](./assets/img/fishes-features.png)
 
 ## Install
 
