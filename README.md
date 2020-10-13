@@ -4,9 +4,14 @@ Neural Architecture Search for Conditional Dependences is a deep dearning proced
 
 * [Report on Neural Architecture Search for Conditional Dependencies](./assets/project_report.pdf)
 
+A search strategy (reinforcement learning, bayesian, genetic) is interacting with an environment to create and evaluate deep neural networks with different topologies, specificaly between their outputs.
+
 ![Automatic search](./assets/img/search.png)
 
+
 ![Best models found](./assets/img/best-models-found.jpeg)
+
+The found conditional dependencies can explain the data.
 
 ![Best models on fishes](./assets/img/fishes-features.png)
 
